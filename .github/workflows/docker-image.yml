@@ -1,0 +1,53 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-java:
+    name: Build Java Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Build Java Project with Maven
+        run: mvn clean package -DskipTests
+        working-directory: ./java
+
+      - name: Build Docker Image for Java
+        run: docker build -t java:ci ./java
+
+  build-angular:
+    name: Build Angular Project
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 10
+        uses: actions/setup-node@v3
+        with:
+          node-version: '10'
+
+      - name: Install and Build Angular Project
+        run: |
+          npm install
+          npm run build
+        working-directory: ./angular
+
+      - name: Build Docker Image for Angular
+        run: docker build -t angular:ci ./angular
